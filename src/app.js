@@ -1,5 +1,3 @@
-
-
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
@@ -17,8 +15,7 @@ const morganOption = (NODE_ENV === 'production')
   : 'common';
 
 function validateBearerToken(req, res, next) {
-  const authToken = req.get('authorization');
-
+  const authToken = req.get('Authorization');
   if (!authToken || authToken.split(' ')[1] !== apiToken) {
     logger.error(`Unauthorized request to path: ${req.path}`);
     return res.status(401).json({ error: 'Unauthorized Request' });
