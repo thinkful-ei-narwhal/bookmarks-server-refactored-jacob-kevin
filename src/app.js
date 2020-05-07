@@ -1,4 +1,4 @@
-'use strict';
+
 
 require('dotenv').config();
 const express = require('express');
@@ -17,14 +17,14 @@ const morganOption = (NODE_ENV === 'production')
   : 'common';
 
 function validateBearerToken(req, res, next) {
-  const authToken = req.get('authorization')
+  const authToken = req.get('authorization');
 
   if (!authToken || authToken.split(' ')[1] !== apiToken) {
-    logger.error(`Unauthorized request to path: ${req.path}`)
-    return res.status(401).json({ error: 'Unauthorized Request' })
+    logger.error(`Unauthorized request to path: ${req.path}`);
+    return res.status(401).json({ error: 'Unauthorized Request' });
   }
 
-  next()
+  next();
 }
 
 app.get('/', (req, res) => {
@@ -37,17 +37,17 @@ app.use(cors());
 
 app.use(validateBearerToken);
 
-app.use(bookmarkRouter)
+app.use(bookmarkRouter);
 
 app.use(function errorHandler(error, req, res, next) {
-  let response
+  let response;
   if (NODE_ENV === 'production') {
-   response = { error: { message: 'server error' } }
+    response = { error: { message: 'server error' } };
   } else {
-    console.error(error)
-    response = { message: error.message, error }
+    console.error(error);
+    response = { message: error.message, error };
   }
-  res.status(500).json(response)
-})
+  res.status(500).json(response);
+});
 
 module.exports = app;
