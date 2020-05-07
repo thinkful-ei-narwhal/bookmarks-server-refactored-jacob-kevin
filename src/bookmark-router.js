@@ -15,39 +15,30 @@ bookmarkRouter
       })
       .catch(next);
   })
-  .post(bodyParser, (req, res) => {
-    const knexInstance= req.app.post('db');
+  .post(bodyParser, (req, res, next) => {
+
     const {  title, url, description, rating } = req.body;
-    if (!title) {
-      logger.error('Title is required');
-      return res
-        .status(400)
-        .send('Title is required');
-    }
-    if (!url) {
-      logger.error('Description is required');
-      return res
-        .status(400)
-        .send('Description is required');
-    }
-    if (!rating) {
-      logger.error('Rating is required');
-      return res
-        .status(400)
-        .send('Rating is required');
+    const newBookmark = { title, url, rating }
+
+    for(const [key, value] of Object.entries(newBookmark)) {
+      if(value == null) {
+        return res.status(400).json({
+          error: { message: `Missing '${key}' in request body`}
+        })
+      }
     }
 
-    const newBookmark = {
-      title: title,
-      url: url,
-      description: description,
-      rating: rating,
-    };
-
-    BookmarksService.insertBookmark(knexInstance, newBookmark)
-      .then(bookmarks => {
-        res.status(201).json(bookmarks);
-      });
+    BookmarksService.insertBookmark(
+      req.app.get('db'),
+      newBookmark
+    )
+    .then(bookmark => {
+      res 
+        .status(201)
+        .location(`/bookmarks/${bookmarks.id}`)
+        .json(bookmark)
+    })
+    .catch(next)
   });
 
 bookmarkRouter
@@ -67,4 +58,11 @@ bookmarkRouter
     bookmarks.splice(deletedBookmark, 1);
     res.status(204).send('Bookmark deleted successfully.');
   });
+
+
 module.exports = bookmarkRouter;
+
+
+///const actualDate = new Date(res.body.date_published).toLocaleString()
+//const expectedDate = new Date().toLocaleString
+//expect(actualDate).to.eql(expectedDate) 
