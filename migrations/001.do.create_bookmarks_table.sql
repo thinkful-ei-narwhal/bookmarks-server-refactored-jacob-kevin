@@ -3,5 +3,6 @@ CREATE TABLE bookmarks_table (
   title TEXT NOT NULL,
   url TEXT NOT NULL,
   description TEXT,
-  rating decimal(12,2) NOT NULL
-)
+  rating INTEGER 
+);
+

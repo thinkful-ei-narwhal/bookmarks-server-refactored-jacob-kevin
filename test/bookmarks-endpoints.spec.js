@@ -97,4 +97,39 @@ describe('Bookmarks Endpoints', function() {
       });
     });
   });
+
+  describe.only(`PATCH /bookmarks/:bookmarkId`, () => {
+    context(`Given no bookmarks`, () => {
+      it(`responds with 404`, () => {
+        const bookmarkId = 123456
+        return supertest(app)
+          .patch(`/bookmarks/${bookmarkId}`)
+          .set('Authorization', 'Bearer ' + process.env.API_TOKEN)
+          .expect(404, { error: { message: `Bookmark doesn't exist` } })
+      })
+    })
+     context('Given there are bookmarks in the database', () => {
+        const testBookmarks = makeBookmarksArray()
+    
+        beforeEach('insert bookmraks', () => {
+           return db
+             .into('bookmarks_table')
+             .insert(testBookmarks)
+         })
+    
+         it('responds with 204 and updates the article', () => {
+           const idToUpdate = 2
+           const updateBookmark = {
+            title: 'updated bookmark title',
+            url: 'test.url',
+            rating: '5.00',
+           }
+           return supertest(app)
+             .patch(`/bookmarks/${idToUpdate}`)
+             .set('Authorization', 'Bearer ' + process.env.API_TOKEN)
+             .send(updateBookmark)
+             .expect(204)
+         })
+       })
+    })
 });

@@ -1,9 +1,26 @@
 const express = require('express');
-const xss = require('xss');
 const bookmarkRouter = express.Router();
 const bodyParser = express.json();
 const logger = require('./logger');
 const BookmarksService = require('./bookmarks-service');
+
+
+bookmarkRouter.get('/bookmarks/:id', (req, res, next) => {
+  BookmarksService.getBookmarkById(req.app.get('db'), req.params.id)
+    .then(bookmark => {
+      if(bookmark) {
+        res.json(bookmark)
+      }
+      else {
+        res.status(404).json({
+          message: 'Message not found'
+        })
+      }
+    })
+})
+
+
+
 
 bookmarkRouter
   .route('/bookmarks')
@@ -42,29 +59,22 @@ bookmarkRouter
 
 bookmarkRouter
   .route('/bookmarks/:id')
-  .all((req, res, next) => {
-    BookmarksService.getBookmarkById(
+
+  .patch(bodyParser, (req, res, next) => {
+    const { title, url, description, rating } = req.body
+    const bookmarkToUpdate = { title, url, description, rating }
+
+    BookmarksService.updateBookmarkById(
       req.app.get('db'),
-      req.params.id
+      req.params.id,
+      bookmarkToUpdate
     )
-      .then(bookmark=> {
-        if (!bookmark) {
-          return res.status(404).json({
-            error: { message: 'Bookmark doesn\'t exist' }
-          });
-        }
-        res.bookmark = bookmark;
-        next();
-      })
-      .catch(next);
+    .then(() => {
+      res.status(204).end()
+    })
+    .catch(next)
   })
-  // .get((req, res, next) => {
-  //   res.json({
-  //     id: res.bookmark.id,
-  //     title: xss(res.bookmark.title),
-  //     url: xss(res.bookmark.url),
-  //     description: xss(res.bookmark.description),
-  //   })
+
 
   .delete((req, res, next) => {
     BookmarksService.deleteBookmarkById(
@@ -72,15 +82,16 @@ bookmarkRouter
       req.params.id
     )
       .then(() => {
-        res.status(204).end();
+       return res.status(204).end();
       })
       .catch(next);
   });
 
 
+
+
+
+
 module.exports = bookmarkRouter;
 
 
-///const actualDate = new Date(res.body.date_published).toLocaleString()
-//const expectedDate = new Date().toLocaleString
-//expect(actualDate).to.eql(expectedDate) 
