@@ -1,6 +1,6 @@
 const express = require('express');
 const { v4: uuid } = require('uuid');
-let bookList = require('./store');
+let data = require('./store');
 const logger = require('./logger');
 
 const bookmarkRouter = express.Router();
@@ -29,45 +29,41 @@ bookmarkRouter
       description,
     };
 
-    data.push(newBm);
+    data.push(newBookmark);
     logger.info(`Successful post : Bookmark ${title} was added with id: ${id}`);
-    res.status(201).json(newBm);
+    res.status(201).json(newBookmark);
   });
 
 bookmarkRouter
 	.route('/:id')
 	.get((req, res) => {
-		const id = req.params.id;
-
-		const book = bookList.find((book) => {
-			return id === book.id;
-		});
-
-		if (!book) {
-			logger.error('Book not found');
-			return res.status(404).send('Could not found the book');
+		const { id } = req.params;
+		let bookmark = data.find((bm) => bm.id === id);
+	
+		if (typeof bookmark === "undefined") {
+		  logger.error(`Failed get book with id: ${id}`);
+		  return res.status(404).send(`Bookmark with ${id} was not found`);
 		}
-
-		res.status(201).json(book);
-	})
+	
+		logger.info(
+		  `Successful get : Bookmark ${bookmark.title} was retrieved with id: ${bookmark.id}`
+		);
+		res.status(201).json(bookmark);
+	  })
 	.delete((req, res) => {
-		const id = req.params.id;
-
-		const book = bookList.find((book) => {
-			return id === book.id;
-		});
-
-		if (!book) {
-			logger.error('Book not found');
-			return res.status(404).send('Could not found the book');
+		const { id } = req.params;
+		let delBookmark = data.findIndex((bm) => bm.id === id);
+	
+		if (delBookmark === -1) {
+		  logger.error(`Failed to delete : Bookmark ${delBookmark.title} `);
+		  return res.status(404).send(`Bookmark with id ${id} was not found`);
 		}
-
-		if (book) {
-			bookList = bookList.filter((item) => {
-				item.id !== book.id;
-			});
-			return res.status(200).send('deleted');
-		}
+	
+		data.splice(delBookmark, 1);
+		logger.info(
+		  `Successful delete : Bookmark ${delBookmark.title} was deleted with id: ${delBookmark.id}`
+		);
+		res.status(201).send(`Bookmark with id ${id} was deleted`);
 	});
 
 module.exports = bookmarkRouter;
