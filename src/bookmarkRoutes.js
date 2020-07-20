@@ -28,10 +28,11 @@ bookmarkRouter
       url,
       description,
     };
-
-    data.push(newBookmark);
-    logger.info(`Successful post : Bookmark ${title} was added with id: ${id}`);
-    res.status(201).json(newBookmark);
+	if(title && url) {
+		data.push(newBookmark);
+		logger.info(`Successful post : Bookmark ${title} was added with id: ${id}`);
+		res.status(201).json(newBookmark);
+	}
   });
 
 bookmarkRouter
